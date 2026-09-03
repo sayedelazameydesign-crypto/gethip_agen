@@ -6,3 +6,5 @@ export const Plan=z.object({summary:z.string(),steps:z.array(z.string()),tools:z
 export const CreateRunRequest=z.object({repository:z.string().min(1),request:z.string().min(3)});
 export type RunState=z.infer<typeof RunState>; export type Plan=z.infer<typeof Plan>; export type ToolRequest=z.infer<typeof ToolRequest>;
 export type Evidence={runId:string;request:string;plan:string[];tools:string[];filesChanged:string[];commands:string[];tests:string[];gitDiff:string;result:'SUCCESS'|'PENDING'|'FAILED'};
+
+export type {IPlugin,IPluginContext,ITaskDefinition,IEvidenceStrategy,TaskContext} from './plugin.types.js';

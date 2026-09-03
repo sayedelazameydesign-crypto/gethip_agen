@@ -1,0 +1,2 @@
+import {z} from 'zod'; import type {IPlugin} from '@agent/contracts';
+export const ExamplePlugin:IPlugin={name:'example-plugin',version:'1.0.0',register(ctx){ctx.registerTask({id:'send_email',schema:z.object({to:z.string().email(),subject:z.string(),body:z.string()}),requiredApprovalLevel:2,handler:async(input)=>({success:true,provider:'demo',to:(input as {to:string}).to})});ctx.registerEvidenceStrategy({id:'email_logs',collect:async(data)=>({timestamp:new Date().toISOString(),provider:'demo',status:(data as {success?:boolean}).success?'sent':'failed'})})}};
