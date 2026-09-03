@@ -7,3 +7,6 @@ export function evaluateTool(tool:ToolRequest):Decision {
  if(level1.includes(tool.name)) return {allowed:true,requiresApproval:true,reason:'يتطلب موافقة Level 1'};
  return {allowed:false,requiresApproval:false,reason:'الأداة غير مسجلة أو محظورة افتراضيًا'};
 }
+
+export {SecurityKernel} from './kernel.js';
+export type {ApprovalRequest} from './kernel.js';

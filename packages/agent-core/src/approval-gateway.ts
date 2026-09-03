@@ -1,0 +1,2 @@
+import {loadPoliciesFromDir} from '@agent/extension-system'; import {SecurityKernel} from '@agent/security';
+export class ApprovalGateway { constructor(private securityKernel=new SecurityKernel(),private policiesDir='./policies/approval/'){ } async request(level:1|2|3,payload:Record<string,unknown>){const policies=await loadPoliciesFromDir(this.policiesDir);return this.securityKernel.evaluate({level,payload,policies})} }

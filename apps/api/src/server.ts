@@ -1,5 +1,5 @@
 import Fastify from 'fastify'; import cors from '@fastify/cors'; import {randomUUID} from 'node:crypto'; import {CreateRunRequest} from '@agent/contracts'; import {createPlan,evidence,policySummary,initAgent} from '@agent/core'; import {ExamplePlugin} from '@agent/plugin-example';
-const app=Fastify({logger:true}); await app.register(cors,{origin:true}); const runs=new Map<string,any>(); const agent=await initAgent({plugins:[ExamplePlugin]});
+const app=Fastify({logger:true}); await app.register(cors,{origin:true}); const runs=new Map<string,any>(); const agent=await initAgent({plugins:[ExamplePlugin],policiesDir:'./policies/approval'});
 app.get('/health',async()=>({ok:true,service:'arabic-github-agent'}));
 app.get('/api/runs',async()=>Array.from(runs.values()));
 app.get('/api/tasks',async()=>agent.taskRegistry.getAll().map(t=>({id:t.id,requiredApprovalLevel:t.requiredApprovalLevel})));
