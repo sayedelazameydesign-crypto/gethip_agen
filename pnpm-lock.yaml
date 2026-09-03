@@ -26,6 +26,9 @@ importers:
       '@agent/core':
         specifier: workspace:*
         version: link:../../packages/agent-core
+      '@agent/orchestrator':
+        specifier: workspace:*
+        version: link:../../packages/orchestrator
       '@agent/plugin-example':
         specifier: workspace:*
         version: link:../../packages/plugins/example-task
@@ -121,6 +124,31 @@ importers:
         specifier: ^3.24.1
         version: 3.25.76
     devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@26.4.1)
+
+  packages/orchestrator:
+    dependencies:
+      '@agent/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@agent/core':
+        specifier: workspace:*
+        version: link:../agent-core
+      '@agent/extension-system':
+        specifier: workspace:*
+        version: link:../extension-system
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
+    devDependencies:
+      '@agent/plugin-example':
+        specifier: workspace:*
+        version: link:../plugins/example-task
       typescript:
         specifier: ^5.7.2
         version: 5.9.3
