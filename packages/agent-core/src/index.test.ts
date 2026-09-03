@@ -1,0 +1,2 @@
+import {describe,it,expect} from 'vitest'; import {createPlan,nextState,policySummary} from './index.js';
+describe('agent core',()=>{it('creates safe read plan',()=>{const p=createPlan('افحص الاختبارات','demo/repo');expect(p.tools[0].name).toBe('repo.get');expect(policySummary(p).every(x=>x.allowed)).toBe(true)});it('enforces approval transition',()=>{expect(nextState('WAITING_APPROVAL')).toBe('CANCELLED');expect(nextState('WAITING_APPROVAL',true)).toBe('EXECUTING')})});

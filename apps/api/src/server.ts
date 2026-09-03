@@ -1,0 +1,8 @@
+import Fastify from 'fastify'; import cors from '@fastify/cors'; import {randomUUID} from 'node:crypto'; import {CreateRunRequest} from '@agent/contracts'; import {createPlan,evidence,policySummary} from '@agent/core';
+const app=Fastify({logger:true}); await app.register(cors,{origin:true}); const runs=new Map<string,any>();
+app.get('/health',async()=>({ok:true,service:'arabic-github-agent'}));
+app.get('/api/runs',async()=>Array.from(runs.values()));
+app.post('/api/runs',async(req,reply)=>{const parsed=CreateRunRequest.safeParse(req.body);if(!parsed.success)return reply.code(400).send({error:parsed.error.flatten()});const id=randomUUID();const plan=createPlan(parsed.data.request,parsed.data.repository);const run={id,...parsed.data,state:'WAITING_APPROVAL',plan,policy:policySummary(plan),evidence:evidence(id,parsed.data.request,plan,'WAITING_APPROVAL'),createdAt:new Date().toISOString()};runs.set(id,run);return reply.code(201).send(run)});
+app.post('/api/runs/:id/approve',async(req,reply)=>{const run=runs.get((req.params as any).id);if(!run)return reply.code(404).send({error:'Run not found'});run.state='EXECUTING';run.evidence.result='PENDING';return run});
+app.get('/api/runs/:id/evidence',async(req,reply)=>{const run=runs.get((req.params as any).id);return run?run.evidence:reply.code(404).send({error:'Run not found'})});
+app.listen({port:Number(process.env.PORT||3001),host:'0.0.0.0'});
