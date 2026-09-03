@@ -131,6 +131,22 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@26.4.1)
 
+  packages/llm-planner:
+    dependencies:
+      '@agent/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      zod:
+        specifier: ^3.24.1
+        version: 3.25.76
+    devDependencies:
+      typescript:
+        specifier: ^5.7.2
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.8
+        version: 2.1.9(@types/node@26.4.1)
+
   packages/orchestrator:
     dependencies:
       '@agent/contracts':
@@ -142,6 +158,9 @@ importers:
       '@agent/extension-system':
         specifier: workspace:*
         version: link:../extension-system
+      '@agent/llm-planner':
+        specifier: workspace:*
+        version: link:../llm-planner
       zod:
         specifier: ^3.24.1
         version: 3.25.76
