@@ -2,7 +2,7 @@ import { createOrchestrator } from '../packages/orchestrator/dist/index.js';
 import { ExamplePlugin } from '../packages/plugins/example-task/dist/index.js';
 
 let orchestratorPromise;
-const getOrchestrator = () => (orchestratorPromise ||= createOrchestrator([ExamplePlugin]));
+const getOrchestrator = () => (orchestratorPromise ||= createOrchestrator([ExamplePlugin],process.env.GEMINI_API_KEY));
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') { res.statusCode = 204; return res.end(); }

@@ -1,2 +1,15 @@
-import type {StrategyRegistry} from '@agent/extension-system'; import type {AgentGoal,ExecutionReport,ExecutionStep} from './types.js'; import {Planner} from './planner.js';
-export class AgentLoop { constructor(private planner:Planner,private executeTask:(taskId:string,input:unknown)=>Promise<unknown>,private strategies:StrategyRegistry){} async run(goal:AgentGoal):Promise<ExecutionReport>{const start=Date.now();const steps:ExecutionStep[]=[];let taskId='unknown';try{taskId=await this.planner.plan(goal);const step:ExecutionStep={taskId,input:goal.parameters,timestamp:new Date().toISOString(),status:'pending',approval:{level:0,approved:false}};const output=await this.executeTask(taskId,goal.parameters);step.output=output;step.status='executed';const evidence:Record<string,unknown>={};for(const strategy of this.strategies.getAll()){try{evidence[strategy.id]=await strategy.collect({taskId,input:goal.parameters,output,goal})}catch(error){evidence[strategy.id]={error:String(error)}}}step.evidence=evidence;steps.push(step);return {agentId:'gethip-agent',goal,steps,finalOutput:output,summary:`Executed task "${taskId}" successfully.`,totalTime:Math.max(1,Date.now()-start),success:true}}catch(error){const message=error instanceof Error?error.message:String(error);steps.push({taskId,input:goal.parameters,timestamp:new Date().toISOString(),status:'failed',approval:{level:0,approved:false,reason:message},output:{error:message}});return {agentId:'gethip-agent',goal,steps,finalOutput:null,summary:`Failed: ${message}`,totalTime:Math.max(1,Date.now()-start),success:false}}}}
+import type {StrategyRegistry} from '@agent/extension-system';
+import type {AgentGoal,ExecutionReport,ExecutionStep} from './types.js';
+export type PlanResult=string|{taskId:string;parameters:Record<string,unknown>};
+export class AgentLoop {
+  constructor(private planner:{plan:(goal:AgentGoal)=>Promise<PlanResult>},private executeTask:(taskId:string,input:unknown)=>Promise<unknown>,private strategies:StrategyRegistry){}
+  async run(goal:AgentGoal):Promise<ExecutionReport>{
+    const start=Date.now(); const steps:ExecutionStep[]=[]; let taskId='unknown'; let input=goal.parameters;
+    try { const planned=await this.planner.plan(goal); taskId=typeof planned==='string'?planned:planned.taskId; input=typeof planned==='string'?goal.parameters:planned.parameters;
+      const step:ExecutionStep={taskId,input,timestamp:new Date().toISOString(),status:'pending',approval:{level:0,approved:false}};
+      const output=await this.executeTask(taskId,input); step.output=output; step.status='executed'; const evidence:Record<string,unknown>={};
+      for(const strategy of this.strategies.getAll()){try{evidence[strategy.id]=await strategy.collect({taskId,input,output,goal})}catch(error){evidence[strategy.id]={error:String(error)}}}
+      step.evidence=evidence; steps.push(step); return {agentId:'gethip-agent',goal,steps,finalOutput:output,summary:`Executed task "${taskId}" successfully.`,totalTime:Math.max(1,Date.now()-start),success:true};
+    } catch(error){const message=error instanceof Error?error.message:String(error);steps.push({taskId,input,timestamp:new Date().toISOString(),status:'failed',approval:{level:0,approved:false,reason:message},output:{error:message}});return {agentId:'gethip-agent',goal,steps,finalOutput:null,summary:`Failed: ${message}`,totalTime:Math.max(1,Date.now()-start),success:false};}
+  }
+}

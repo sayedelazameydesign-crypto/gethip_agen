@@ -1,0 +1,3 @@
+import type {ITaskDefinition} from '@agent/contracts';
+export function buildSystemPrompt(tasks:ITaskDefinition[]){const descriptions=tasks.map(t=>`- taskId: ${t.id}\n  input schema: ${JSON.stringify(t.schema._def)}`).join('\n');return `You are a safe Arabic planning assistant. Choose exactly one task from this allowlist and produce JSON only.\n\n${descriptions}\n\nRules: output only {"taskId": string|null, "parameters": object}; never invent a task; never make approval or execution decisions; parameters must be validated by the runtime.`}
+export function buildUserPrompt(intent:string){return `User request: ${intent}`}
