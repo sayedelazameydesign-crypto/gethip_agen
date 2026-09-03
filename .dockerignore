@@ -1,0 +1,16 @@
+node_modules
+dist
+.git
+.github
+.vscode
+*.log
+coverage
+.nyc_output
+.DS_Store
+*.test.ts
+*.spec.ts
+.env
+.env.*
+!policies/**/*.json
+!policies/**/*.yaml
+!policies/**/*.yml

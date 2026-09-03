@@ -1,0 +1,21 @@
+services:
+  agent-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gethip-agent
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      AGENT_POLICIES_DIR: /app/policies/approval
+      LOG_LEVEL: info
+    volumes:
+      - ./policies:/app/policies:ro
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3000/health',r=>process.exit(r.statusCode===200?0:1)).on('error',()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

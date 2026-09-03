@@ -6,7 +6,11 @@
     "dev": "pnpm --parallel --filter @agent/api --filter @agent/web dev",
     "build": "pnpm -r build",
     "test": "pnpm -r test",
-    "typecheck": "pnpm -r typecheck"
+    "typecheck": "pnpm -r typecheck",
+    "docker:build": "docker build -t gethip-agent .",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
   },
   "devDependencies": {
     "@types/node": "^26.4.1",
