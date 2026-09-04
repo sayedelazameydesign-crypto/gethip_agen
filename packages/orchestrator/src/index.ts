@@ -13,7 +13,7 @@ export async function createOrchestrator(plugins:IPlugin[]=[ExamplePlugin],gemin
   const fallback={plan:async(intent:string)=>({taskId:await keyword.plan({intent,parameters:{}}),parameters:{}})};
   let provider:GeminiProvider|null=null; if(geminiApiKey){try{provider=new GeminiProvider(geminiApiKey)}catch(error){console.warn('Gemini unavailable; using keyword planner',error)}}
   const planner=new LLMPlanner(agent.taskRegistry.getAll(),provider,fallback);
-  const selectedPlanner=provider?{plan:(goal:AgentGoal)=>planner.plan(goal.intent)}:{plan:(goal:AgentGoal)=>keyword.plan(goal)};
+  const selectedPlanner=provider?{plan:(goal:AgentGoal)=>planner.plan(goal.intent,goal.parameters)}:{plan:(goal:AgentGoal)=>keyword.plan(goal)};
   const orchestrator=new AgentLoop(selectedPlanner,agent.executeTask,agent.strategyRegistry);
   return {agent,orchestrator,run:(goal:AgentGoal)=>orchestrator.run(goal)};
 }
