@@ -1,3 +1,6 @@
+// اختبارات وحدة لمهايئ Turso: مقلَّدات فقط، بلا أي قاعدة بيانات حقيقية.
+// السلوك الحقيقي (قراءة/كتابة/تحديث) مكانه tests/stores.integration.test.ts في الجذر،
+// ويُنفَّذ مقابل libSQL حقيقي (file:) وSQLite معًا.
 import {describe,it,expect,beforeEach,afterEach,vi} from 'vitest';
 import {createClient} from '@libsql/client';
 
@@ -42,7 +45,7 @@ vi.mock('@libsql/client',()=>({
 
 const {TursoApprovalStore}=await import('./turso.js');
 
-describe('TursoApprovalStore',()=>{
+describe('TursoApprovalStore — وحدة (مقلَّد)',()=>{
  beforeEach(()=>{
   fake.rows.length=0; fake.sqls.length=0; vi.clearAllMocks();
   process.env.TURSO_DATABASE_URL='libsql://demo.turso.io';
@@ -64,72 +67,33 @@ describe('TursoApprovalStore',()=>{
   await store.createApproval({level:1,payload:{}});
  });
 
- it('يهيئ الجدول مرة واحدة فقط',async()=>{
+ it('يقبل رابطًا ورمزًا مُمرَّرين صراحةً',async()=>{
+  delete process.env.TURSO_DATABASE_URL;
+  delete process.env.TURSO_AUTH_TOKEN;
+  const store=new TursoApprovalStore('libsql://explicit.turso.io','explicit-token');
+  expect(createClient).toHaveBeenCalledWith({url:'libsql://explicit.turso.io',authToken:'explicit-token'});
+  await store.createApproval({level:1,payload:{}});
+ });
+
+ it('يهيئ الجدول مرة واحدة فقط (تحميل كسول)',async()=>{
   const store=new TursoApprovalStore();
   await store.createApproval({level:1,payload:{}});
   await store.createApproval({level:2,payload:{}});
   expect(fake.sqls.filter(sql=>sql.startsWith('CREATE TABLE'))).toHaveLength(1);
  });
 
- it('ينشئ سجلًا معلقًا ويقرأه مع الحمولة',async()=>{
+ it('يُسقط حقول المعتمِد عندما تكون فارغة (تحويل الصف)',async()=>{
   const store=new TursoApprovalStore();
-  const record=await store.createApproval({level:3,payload:{to:'a@b.com',meta:{n:1}}});
-  expect(record.status).toBe('pending');
+  const record=await store.createApproval({level:2,payload:{to:'a@b.com'}});
   const fetched=await store.getApprovalStatus(record.id);
-  expect(fetched).toMatchObject({id:record.id,status:'pending',level:3,payload:{to:'a@b.com',meta:{n:1}}});
+  expect(fetched).toMatchObject({id:record.id,status:'pending',level:2,payload:{to:'a@b.com'}});
   expect(fetched?.approver).toBeUndefined();
-  expect(Date.parse(record.expiresAt)-Date.parse(record.createdAt)).toBe(300_000);
+  expect(fetched?.decidedAt).toBeUndefined();
  });
 
- it('يحترم ttl مخصصًا ويعلّم السجل منتهيًا',async()=>{
+ it('يعيد null ولا يعتبره معتمدًا عند غياب الصف',async()=>{
   const store=new TursoApprovalStore();
-  const record=await store.createApproval({level:2,payload:{},ttlMs:1});
-  await new Promise(r=>setTimeout(r,5));
-  expect(await store.verifyApproved(record.id)).toBe(false);
-  expect((await store.getApprovalStatus(record.id))?.status).toBe('expired');
- });
-
- it('يسجل بيانات المعتمِد ويتحقق من الاعتماد',async()=>{
-  const store=new TursoApprovalStore();
-  const record=await store.createApproval({level:2,payload:{to:'ok@example.com'}});
-  expect(await store.verifyApproved(record.id)).toBe(false);
-  const approved=await store.markApproved(record.id,{id:'manager-1',role:'manager'});
-  expect(approved.status).toBe('approved');
-  expect(approved.approver).toEqual({id:'manager-1',role:'manager'});
-  expect(approved.decidedAt).toBeTypeOf('string');
-  expect(await store.verifyApproved(record.id)).toBe(true);
- });
-
- it('يسجل الرفض ولا يعتبره اعتمادًا',async()=>{
-  const store=new TursoApprovalStore();
-  const record=await store.createApproval({level:2,payload:{}});
-  const rejected=await store.markRejected(record.id,{id:'manager-2',role:'security'});
-  expect(rejected.status).toBe('rejected');
-  expect(rejected.approver).toEqual({id:'manager-2',role:'security'});
-  expect(await store.verifyApproved(record.id)).toBe(false);
- });
-
- it('يمنع القرار المزدوج',async()=>{
-  const store=new TursoApprovalStore();
-  const record=await store.createApproval({level:2,payload:{}});
-  await store.markApproved(record.id,{id:'m',role:'manager'});
-  await expect(store.markApproved(record.id,{id:'m',role:'manager'})).rejects.toThrow('Approval cannot be approved: approved');
-  await expect(store.markRejected(record.id,{id:'m',role:'manager'})).rejects.toThrow('Approval cannot be rejected: approved');
- });
-
- it('يرفض القرار على سجل غير موجود',async()=>{
-  const store=new TursoApprovalStore();
-  await expect(store.markApproved('missing',{id:'m',role:'manager'})).rejects.toThrow('Approval cannot be approved: not_found');
   expect(await store.getApprovalStatus('missing')).toBeNull();
   expect(await store.verifyApproved('missing')).toBe(false);
- });
-
- it('يعتبر الاعتماد منتهيًا بعد تجاوز expiresAt',async()=>{
-  const store=new TursoApprovalStore();
-  const record=await store.createApproval({level:2,payload:{},ttlMs:30});
-  await store.markApproved(record.id,{id:'m',role:'manager'});
-  expect(await store.verifyApproved(record.id)).toBe(true);
-  await new Promise(r=>setTimeout(r,40));
-  expect(await store.verifyApproved(record.id)).toBe(false);
  });
 });
