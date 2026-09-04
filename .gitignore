@@ -5,3 +5,4 @@ dist
 coverage
 data
 *.sqlite
+apps/api/data/
