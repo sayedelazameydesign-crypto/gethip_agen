@@ -2,3 +2,6 @@ node_modules
 dist
 .env
 *.db
+coverage
+data
+*.sqlite
