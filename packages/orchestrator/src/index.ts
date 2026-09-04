@@ -1,4 +1,5 @@
 import type {IPlugin} from '@agent/contracts';
+import type {ApprovalStore} from '@agent/approval-store';
 import {initAgent} from '@agent/core';
 import {ExamplePlugin} from '@agent/plugin-example';
 import {LLMPlanner,GeminiProvider} from '@agent/llm-planner';
@@ -7,8 +8,8 @@ import {AgentLoop} from './loop.js';
 import type {AgentGoal} from './types.js';
 export type {AgentGoal,ExecutionReport,ExecutionStep} from './types.js';
 export {KeywordPlanner as Planner,AgentLoop};
-export async function createOrchestrator(plugins:IPlugin[]=[ExamplePlugin],geminiApiKey?:string){
-  const agent=await initAgent({plugins}); const keyword=new KeywordPlanner(agent.taskRegistry);
+export async function createOrchestrator(plugins:IPlugin[]=[ExamplePlugin],geminiApiKey?:string,approvalStore?:ApprovalStore){
+  const agent=await initAgent({plugins,approvalStore}); const keyword=new KeywordPlanner(agent.taskRegistry);
   const fallback={plan:async(intent:string)=>({taskId:await keyword.plan({intent,parameters:{}}),parameters:{}})};
   let provider:GeminiProvider|null=null; if(geminiApiKey){try{provider=new GeminiProvider(geminiApiKey)}catch(error){console.warn('Gemini unavailable; using keyword planner',error)}}
   const planner=new LLMPlanner(agent.taskRegistry.getAll(),provider,fallback);
