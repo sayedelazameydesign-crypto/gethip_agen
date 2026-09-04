@@ -1,1 +1,21 @@
-{"name":"@agent/extension-system","version":"0.1.0","type":"module","main":"dist/index.js","types":"dist/index.d.ts","scripts":{"build":"tsc -p tsconfig.json","typecheck":"tsc -p tsconfig.json --noEmit","test":"vitest run --passWithNoTests"},"dependencies":{"@agent/contracts":"workspace:*","zod":"^3.24.1","yaml":"^2.7.0"},"devDependencies":{"typescript":"^5.7.2","vitest":"^2.1.8"}}
+{
+  "name": "@agent/extension-system",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@agent/contracts": "workspace:*",
+    "zod": "^3.24.1",
+    "yaml": "^2.7.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

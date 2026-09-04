@@ -1,1 +1,25 @@
-{"name":"@agent/orchestrator","version":"0.1.0","type":"module","main":"dist/index.js","types":"dist/index.d.ts","scripts":{"build":"tsc -p tsconfig.json","test":"vitest run --passWithNoTests","typecheck":"tsc -p tsconfig.json --noEmit"},"dependencies":{"@agent/core":"workspace:*","@agent/contracts":"workspace:*","@agent/extension-system":"workspace:*","zod":"^3.24.1","@agent/llm-planner":"workspace:*","@agent/approval-store":"workspace:*"},"devDependencies":{"@agent/plugin-example":"workspace:*","typescript":"^5.7.2","vitest":"^2.1.8"}}
+{
+  "name": "@agent/orchestrator",
+  "version": "0.1.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@agent/core": "workspace:*",
+    "@agent/contracts": "workspace:*",
+    "@agent/extension-system": "workspace:*",
+    "zod": "^3.24.1",
+    "@agent/llm-planner": "workspace:*",
+    "@agent/approval-store": "workspace:*"
+  },
+  "devDependencies": {
+    "@agent/plugin-example": "workspace:*",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}
