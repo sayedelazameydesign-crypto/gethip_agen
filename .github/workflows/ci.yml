@@ -44,5 +44,8 @@ jobs:
       - name: Run typecheck
         run: pnpm typecheck
 
-      - name: Run tests with coverage
+      - name: Run per-package tests (fails on zero discovered tests)
+        run: pnpm test:packages
+
+      - name: Run tests with coverage (includes repository guards)
         run: pnpm test:coverage
